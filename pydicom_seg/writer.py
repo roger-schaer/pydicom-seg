@@ -163,6 +163,9 @@ class MultiClassWriter:
             segmentation=segmentation
         )
 
+        # FIX - Use ImageOrientationPatient value from DICOM source rather than the segmentation
+        result.SharedFunctionalGroupsSequence[0].PlaneOrientationSequence[0].ImageOrientationPatient = source_images[0].ImageOrientationPatient
+
         buffer = sitk.GetArrayFromImage(segmentation)
         for segment in labels_to_process:
             logger.info(f'Processing segment {segment}')
