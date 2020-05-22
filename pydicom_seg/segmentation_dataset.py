@@ -263,8 +263,13 @@ class SegmentationDataset(pydicom.Dataset):
         
         # FIX - OHIF requires a DerivationImageSequence in a PerFrameFunctionGroupsSequence
         if source_image_sequence:
+            # Create a Dataset to hold the SourceImageSequence attribute
+            source_image_sequence_ds = pydicom.Dataset()
+            source_image_sequence_ds.SourceImageSequence = source_image_sequence
+            # Create the DerivationImageSequence and append the SourceImageSequence
             frame_fg_item.DerivationImageSequence = pydicom.Sequence()
-            frame_fg_item.DerivationImageSequence.append(source_image_sequence)
+            frame_fg_item.DerivationImageSequence.append(source_image_sequence_ds)
+
         self.PerFrameFunctionalGroupsSequence.append(frame_fg_item)
 
         return frame_fg_item
