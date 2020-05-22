@@ -249,7 +249,7 @@ class SegmentationDataset(pydicom.Dataset):
         frame_fg_item.SegmentIdentificationSequence = pydicom.Sequence([pydicom.Dataset()])
         frame_fg_item.SegmentIdentificationSequence[0].ReferencedSegmentNumber = referenced_segment
         if referenced_images:
-            frame_fg_item.SourceImageSequence = pydicom.Sequence()
+            source_image_sequence = pydicom.Sequence()
         for referenced_image in referenced_images:
             # Update (0x0008,0x1115) ReferencedSeriesSequence for each referenced image
             self.add_instance_reference(referenced_image)
@@ -259,7 +259,12 @@ class SegmentationDataset(pydicom.Dataset):
             ref.ReferencedSOPClassUID = referenced_image.SOPClassUID
             ref.ReferencedSOPInstanceUID = referenced_image.SOPInstanceUID
             ref.PurposeOfReferenceCodeSequence = CodeSequence('121322', 'DCM', 'Segmentation')
-            frame_fg_item.SourceImageSequence.append(ref)
+            source_image_sequence.append(ref)
+        
+        # FIX - OHIF requires a DerivationImageSequence in a PerFrameFunctionGroupsSequence
+        if source_image_sequence:
+            frame_fg_item.DerivationImageSequence = pydicom.Sequence()
+            frame_fg_item.DerivationImageSequence.append(source_image_sequence)
         self.PerFrameFunctionalGroupsSequence.append(frame_fg_item)
 
         return frame_fg_item
